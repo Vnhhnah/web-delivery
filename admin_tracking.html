@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theo dõi xe tự hành</title>
+
+    <!-- Leaflet.js để hiển thị bản đồ OpenStreetMap -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        #map {
+            height: 500px;
+            width: 80%;
+            margin: auto;
+            border: 2px solid #000;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Vị trí xe tự hành theo thời gian thực</h2>
+    <div id="map"></div>
+
+    <script>
+        // Khởi tạo bản đồ tại vị trí mặc định
+        var map = L.map('map').setView([10.7769, 106.7009], 15);
+
+        // Load bản đồ từ OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Marker đại diện cho xe tự hành
+        var vehicleMarker = L.marker([10.7769, 106.7009]).addTo(map);
+
+        // Hàm cập nhật vị trí xe từ server Flask
+        function updateVehicleLocation() {
+            fetch('/get_location')  // Gọi API Flask
+                .then(response => response.json())
+                .then(data => {
+                    var lat = data.lat;
+                    var lon = data.lon;
+                    vehicleMarker.setLatLng([lat, lon]);  // Cập nhật vị trí xe
+                    map.setView([lat, lon]);  // Di chuyển bản đồ theo xe
+                })
+                .catch(error => console.error('Lỗi khi lấy tọa độ:', error));
+        }
+
+        // Cập nhật vị trí mỗi 3 giây
+        setInterval(updateVehicleLocation, 3000);
+    </script>
+
+</body>
+</html>
